@@ -21,82 +21,104 @@
     </div>
     </nav>
 
-    <main class="container d-flex p-2 gap-2">
+    <main class="container d-flex pt-4 p-2 gap-2">
     <div class="row">
-        <!-- col-9 - колонка шириной 9/12 от родительской строки -->
+        <!-- Основное -->
         <div class="col-9 d-flex flex-column gap-3">    
-            <div class="d-flex gap-3 align-items-center">
-                <h3>New Questions</h3>
-                <a href="#">Hot Questions</a>
-            </div>
-            <div class="card">
-            <div class="card-body d-flex gap-3">
+            <div class="card border-0">
+            <div class="card-body d-flex gap-3 p-0">
                 <div class="d-flex flex-column gap-3" style="width: min-content;">
                     <div class="image">
                         <img src="../static/img/avatar.jpg" alt="img"
-                            style="width: 100px; height: 100px; object-fit: cover;" />
+                            style="width: 120px; height: 120px; object-fit: cover;" />
                     </div>
                     <div class="card__likes">
                     <input value="5" type="number" class="form-control" />
                     </div>
                 </div>
                 <div class="flex-grow-1">
-                    <h5 class="card-title">Card title</h5>
+                    <h5 class="card-title">How to build a moon park? </h5>
                     <p class="card-text">
                     Some quick example text to build on the card title and make up
+                    the bulk of the card’s content. Some quick example text to build on the card title and make up
+                    the bulk of the card’s content.Some quick example text to build on the card title and make up
                     the bulk of the card’s content.
                     </p>
-                    <div class="d-flex gap-2 align-items-center">
+                    <div class="d-flex gap-2 align-items-center flex-wrap">
+                        <p class="card-text mb-0">Tags:</p>
+                        <a href="#">black-jack</a>
+                        <a href="#">bender</a>
+                    </div>
+                    <!-- <div class="d-flex gap-2 align-items-center">
                     <a href="#" class="btn btn-outline-success">Answers (3)</a>
                     <div class="d-flex gap-2 align-items-center flex-wrap">
                         <p class="card-text mb-0">Tags:</p>
                         <a href="#">black-jack</a>
                         <a href="#">bender</a>
                     </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
             </div>
-            <div class="card">
-            <div class="card-body d-flex gap-3">
-                <div class="d-flex flex-column gap-3" style="width: min-content;">
-                    <div class="image">
-                        <img src="../static/img/avatar.jpg" alt="img"
-                            style="width: 100px; height: 100px; object-fit: cover;" />
+            <div class="d-flex flex-column gap-3 border-top border-bottom py-3">
+                <div class="card">
+                <div class="card-body d-flex gap-3">
+                    <div class="d-flex flex-column gap-3" style="width: min-content;">
+                        <div class="image">
+                            <img src="../static/img/avatar.jpg" alt="img"
+                                style="width: 100px; height: 100px; object-fit: cover;" />
+                        </div>
+                        <div class="card__likes">
+                        <input value="5" type="number" class="form-control" />
+                        </div>
                     </div>
-                    <div class="card__likes">
-                    <input value="5" type="number" class="form-control" />
-                    </div>
-                </div>
-                <div class="flex-grow-1">
-                    <h5 class="card-title">Card title</h5>
-                    <p class="card-text">
-                    Some quick example text to build on the card title and make up
-                    the bulk of the card’s content.
-                    </p>
-                    <div class="d-flex gap-2 align-items-center">
-                    <a href="#" class="btn btn-outline-success">Answers (3)</a>
-                    <div class="d-flex gap-2 align-items-center flex-wrap">
-                        <p class="card-text mb-0">Tags:</p>
-                        <a href="#">black-jack</a>
-                        <a href="#">bender</a>
-                    </div>
+                    <div class="flex-grow-1">
+                        <h5 class="card-title">Card title</h5>
+                        <p class="card-text">
+                        Some quick example text to build on the card title and make up
+                        the bulk of the card’s content.
+                        </p>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="checkChecked" checked>
+                            <label class="form-check-label" for="checkChecked"> Correct! </label>
+                        </div>
                     </div>
                 </div>
+                </div>
+                <div class="card">
+                <div class="card-body d-flex gap-3">
+                    <div class="d-flex flex-column gap-3" style="width: min-content;">
+                        <div class="image">
+                            <img src="../static/img/avatar.jpg" alt="img"
+                                style="width: 100px; height: 100px; object-fit: cover;" />
+                        </div>
+                        <div class="card__likes">
+                        <input value="5" type="number" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h5 class="card-title">Card title</h5>
+                        <p class="card-text">
+                        Some quick example text to build on the card title and make up
+                        the bulk of the card’s content.
+                        </p>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="checkDefault">
+                            <label class="form-check-label" for="checkDefault"> Correct! </label>
+                        </div>
+                    </div>
+                </div>
+                </div>
             </div>
+            
+            <div>
+            <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"> Enter your answer here... </textarea>
             </div>
-            <nav aria-label="Page navigation example">
-                <ul class="pagination">
-                <li class="page-item">
-                    <a class="page-link" href="#">Previous</a>
-                </li>
-                <li class="page-item"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item"><a class="page-link" href="#">Next</a></li>
-                </ul>
-            </nav>
+            
+            <button type="button" class="btn btn-secondary w-25">Answer</button>
+
         </div>
+         <!-- Справа -->
         <div class="col d-flex flex-column gap-4 mt-5">
         <section>
             <h4>Popular Tags</h4>
