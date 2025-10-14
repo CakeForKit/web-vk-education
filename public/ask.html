@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css" />
+    <title>Document</title>
+</head>
+<body>
+    <nav class="navbar bg-body-tertiary">
+    <div class="container-fluid">
+        <a class="navbar-brand">AskPupkin</a>
+        <form class="d-flex" role="search">
+        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"/>
+        <button class="btn btn-outline-success" type="submit">Ask!</button>
+        </form>
+        <div class="d-flex gap-2 align-items-center">
+            <div class="d-inline link-opacity-50-hover"> <a href="#">Log in</a> </div>
+            <div class="d-inline link-opacity-50-hover"> <a href="#">Register</a> </div>
+        </div> 
+    </div>
+    </nav>
+
+    <main class="container pt-4 p-2 gap-2">
+    <div class="row">   
+        <!-- col-9 - колонка шириной 9/12 от родительской строки -->
+        <div class="col-9 d-flex flex-column gap-3">    
+            <div class="d-flex gap-3 align-items-center">
+                <h3>New Questions</h3>
+            </div>
+            
+            <!-- Title -->
+            <div class="row g-3 align-items-start">
+                <div class="col-2">
+                    <label for="title1" class="col-form-label">Title</label>
+                </div>
+                <div class="col">
+                    <input class="form-control" id="title1" type="text" placeholder="How to build a moon park?">
+                </div>
+            </div>
+            <!-- Text -->
+            <div class="row g-3 align-items-start">
+                <div class="col-2">
+                    <label for="text1" class="col-form-label">Text</label>
+                </div>
+                <div class="col">
+                    <textarea class="form-control" id="text1" rows="5" placeholder="Write text here"></textarea>
+                </div>
+            </div>
+            <!-- Tags -->
+            <div class="row g-3 align-items-start">
+                <div class="col-2">
+                    <label for="tags1" class="col-form-label">Title</label>
+                </div>
+                <div class="col">
+                    <input class="form-control" id="tags1" type="text" placeholder="moon, park, puzzle">
+                </div>
+            </div>
+            <!-- Button -->
+            <div class="row g-3 align-items-start">
+                <div class="col-2"></div>
+                <div class="col">
+                    <button type="button" class="btn btn-outline-dark w-25">Ask!</button>
+                </div>
+            </div>
+            
+        </div>
+        <div class="col d-flex flex-column gap-4 mt-5">
+        <section>
+            <h4>Popular Tags</h4>
+            <section class="d-flex flex-wrap align-items-baseline">
+                <a href="#" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover me-2">Primary link</a>
+                <a href="#" class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover me-2">Secondary link</a>
+                <a href="#" class="link-success link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover me-2">Success link</a>
+                <a href="#" class="link-danger link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover me-2">Danger link</a>
+                <a href="#" class="link-warning link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover me-2">Warning link</a>
+                <a href="#" class="link-info link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover me-2">Info link</a>
+            </section>
+        </section>
+        <section>
+            <h4>Best Members</h4>
+            <a href="#">Mr. Freeman</a>
+            <a href="#">Mr. Freeman</a>
+            <a href="#">Mr. Freeman</a>
+            <a href="#">Mr. Freeman</a>
+            <a href="#">Mr. Freeman</a>
+        </section>
+        </div>
+    </div>
+    </main>
+</body>
+</html>
