@@ -8,14 +8,14 @@
                 style="width: 100px; height: 100px; object-fit: cover;" />
         </div>
         <div class="card__likes">
-        <input value="5" type="number" class="form-control" />
+        <input value={{question.cnt_likes}} type="number" class="form-control" />
         </div>
     </div>
     <div class="flex-grow-1">
         <h5 class="card-title">{{ question.title }}</h5>
         <p class="card-text">{{ question.text }}</p>
         <div class="d-flex gap-2 align-items-center">
-        <a href="#" class="btn btn-outline-success">Answers (3)</a>
+        <a href="{% url 'question' question.id %}" class="btn btn-outline-success">Answers ({{question.cnt_answers}})</a>
         <div class="d-flex gap-2 align-items-center flex-wrap">
             <p class="card-text mb-0">Tags:</p>
             {% for t in question.tags %}
