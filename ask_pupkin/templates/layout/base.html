@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,29 +15,30 @@
         <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"/>
         <button class="btn btn-outline-success" type="submit">Ask!</button>
         </form>
-
-        <div class="d-flex gap-2 align-items-center">
-          <div class="image">
-            <img src="{% static 'img/avatar.jpg' %}" alt="img"
-                style="width: 50px; height: 50px; object-fit: cover;" />
-          </div>
-          <div class="content">
-            <div class="navbar-brand">Dr. Pepper</div>
-            <div class="d-inline link-opacity-50-hover"> <a href="#">Settings</a> </div>
-            <div class="d-inline link-opacity-50-hover"> <a href="#">Log out</a> </div>
-          </div>
-        </div> 
-
-        <!-- 
+        
+        {% if is_authz %}
+          <div class="d-flex gap-2 align-items-center">
+            <div class="image">
+              <img src="{% static 'img/avatar.jpg' %}" alt="img"
+                  style="width: 50px; height: 50px; object-fit: cover;" />
+            </div>
+            <div class="content">
+              <div class="navbar-brand">Dr. Pepper</div>
+              <div class="d-inline link-opacity-50-hover"> <a href="#">Settings</a> </div>
+              <div class="d-inline link-opacity-50-hover"> <a href="#">Log out</a> </div>
+            </div>
+          </div> 
+        {% else %}
         <div class="d-flex gap-2 align-items-center">
             <div class="d-inline link-opacity-50-hover"> <a href="#">Log in</a> </div>
             <div class="d-inline link-opacity-50-hover"> <a href="#">Register</a> </div>
         </div> 
-        -->
+        {% endif %}
 
     </div>
     </nav>
 
-
+    {% block content %} 
+    {% endblock %}
 </body>
 </html>
