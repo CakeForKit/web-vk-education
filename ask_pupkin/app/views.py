@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
 IS_AUTHORIZED = True
 
@@ -44,7 +44,13 @@ def paginate(objects_list, request, per_page=5):
     paginator = Paginator(objects_list, per_page) 
     
     page_number = request.GET.get('page')
-    page = paginator.get_page(page_number) # обработка ошибок PageNotAnInteger и EmptyPage внутри функции get_page
+    try:
+        page = paginator.page(page_number)
+    except PageNotAnInteger:
+        page = paginator.page(1)
+    except EmptyPage:
+        page = paginator.page(paginator.num_pages)
+
 
     page_range = paginator.get_elided_page_range(
         number=page.number,
