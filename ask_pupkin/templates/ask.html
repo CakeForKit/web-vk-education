@@ -1,0 +1,52 @@
+{% extends "layout/base.html" %}
+{% load static %}
+
+{% block content %}
+<main class="container pt-4 p-2 gap-2">
+<div class="row">   
+    <!-- col-9 - колонка шириной 9/12 от родительской строки -->
+    <div class="col-9 d-flex flex-column gap-3">    
+        <div class="d-flex gap-3 align-items-center">
+            <h3>New Questions</h3>
+        </div>
+        
+        <!-- Title -->
+        <div class="row g-3 align-items-start">
+            <div class="col-2">
+                <label for="title1" class="col-form-label">Title</label>
+            </div>
+            <div class="col">
+                <input class="form-control" id="title1" type="text" placeholder="How to build a moon park?">
+            </div>
+        </div>
+        <!-- Text -->
+        <div class="row g-3 align-items-start">
+            <div class="col-2">
+                <label for="text1" class="col-form-label">Text</label>
+            </div>
+            <div class="col">
+                <textarea class="form-control" id="text1" rows="5" placeholder="Write text here"></textarea>
+            </div>
+        </div>
+        <!-- Tags -->
+        <div class="row g-3 align-items-start">
+            <div class="col-2">
+                <label for="tags1" class="col-form-label">Title</label>
+            </div>
+            <div class="col">
+                <input class="form-control" id="tags1" type="text" placeholder="moon, park, puzzle">
+            </div>
+        </div>
+        <!-- Button -->
+        <div class="row g-3 align-items-start">
+            <div class="col-2"></div>
+            <div class="col">
+                <button type="button" class="btn btn-outline-dark w-25">Ask!</button>
+            </div>
+        </div>
+        
+    </div>
+    {% include "layout/stats.html" %}
+</div>
+</main>
+{% endblock %}
