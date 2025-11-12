@@ -4,7 +4,7 @@
 <div class="card-body d-flex gap-3">
     <div class="d-flex flex-column gap-3" style="width: min-content;">
         <div class="image">
-            <img src="{% static 'img/avatar.jpg' %}" alt="img"
+            <img src="{{ answer.user.avatar.url }}" alt="img"
                 style="width: 100px; height: 100px; object-fit: cover;" />
         </div>
         <div class="card__likes">
