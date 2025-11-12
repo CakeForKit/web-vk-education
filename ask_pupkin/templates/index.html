@@ -1,0 +1,25 @@
+{% extends "layout/base.html" %}
+{% load static %}
+
+{% block content %}
+<main class="container pt-4 p-2 gap-2">
+<div class="row">
+    <!-- col-9 - колонка шириной 9/12 от родительской строки -->
+    <div class="col-9 d-flex flex-column gap-3">    
+        <div class="d-flex gap-3 align-items-center">
+            <h3>New Questions</h3>
+            <a href="{% url 'hot' %}">Hot Questions</a>
+        </div>
+        
+        {% for q in questions %}
+        {% include "layout/one_question.html" with question=q %}
+        {% endfor %}
+
+        {% include "layout/paginator.html" %}
+    </div>
+    {% include "layout/stats.html" %}
+</div>
+</main>
+    
+<script>src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"</script>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "layout/base.html" %}
+{% load static %}
+
+{% block content %}
+<main class="container pt-4 p-2 gap-2">
+<div class="row">   
+    <!-- col-9 - колонка шириной 9/12 от родительской строки -->
+    <div class="col-9 d-flex flex-column gap-3">    
+        <h3>Log In</h3>
+        <span id="passwordHelpInline" class="text-danger">
+            Sorry, wrong password
+        </span>
+        <!-- Login -->
+        <div class="row g-3 align-items-start">
+            <div class="col-3">
+                <label for="login1" class="col-form-label">Login</label>
+            </div>
+            <div class="col">
+                <input class="form-control" id="login1" type="text" placeholder="dr_pepper">
+            </div>
+        </div>
+        <!-- Password -->
+        <div class="row g-3 align-items-start">
+            <div class="col-3">
+                <label for="inputPassword6" class="col-form-label">Password</label>
+            </div>
+            <div class="col">
+                <input type="password" id="inputPassword6" class="form-control" aria-describedby="passwordHelpInline">
+            </div>
+        </div>
+
+        <!-- Button -->
+        <div class="row g-3 align-items-start">
+            <div class="col-3"></div>
+            <div class="col">
+                <button type="button" class="btn btn-outline-dark w-25">Log in!</button>
+            </div>
+        </div>
+        <!-- create new account -->
+        <div class="row g-3 align-items-start">
+            <div class="col-3"></div>
+            <div class="col">
+                <a href="{% url 'registration' %}">create new account</a>
+            </div>
+            
+        </div>
+        
+        
+    </div>
+</div>
+</main>
+{% endblock %}
