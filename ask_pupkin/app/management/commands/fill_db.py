@@ -58,11 +58,15 @@ class Command(BaseCommand):
             ))
         Profile.objects.bulk_create(profiles)
 
+        print(f"End create {num_users} users")
+
     def create_tags(self, num_tags):
         tags = []
         for i in range(num_tags):
             tags.append(Tag(title=f'tag_{i}'))
         Tag.objects.bulk_create(tags)
+
+        print(f"End create {num_tags} tags")
 
     def create_questions(self, num_questions, min_tags_one, max_tags_one):
         questions = []
@@ -87,6 +91,8 @@ class Command(BaseCommand):
             question_tags = random.sample(tags, k=random.randint(min_tags_one, max_tags_one))
             question.mm_tags.set(question_tags)
 
+        print(f"End create {num_questions} questions")
+
     def create_answers(self, num_answers):
         answers = []
         profiles = list(Profile.objects.all())
@@ -107,6 +113,8 @@ class Command(BaseCommand):
             )
             answers.append(answer)
         Answer.objects.bulk_create(answers)
+
+        print(f"End create {num_answers} answers")
 
     def create_likes_questions(self, num_likes):
         likes = []
@@ -129,6 +137,8 @@ class Command(BaseCommand):
             likes.append(like)
         LikeQuestion.objects.bulk_create(likes, ignore_conflicts=True)
 
+        print(f"End create {num_likes} question likes")
+
     def create_likes_answers(self, num_likes):
         likes = []
         profiles = list(Profile.objects.all())
@@ -149,4 +159,6 @@ class Command(BaseCommand):
             )
             likes.append(like)
         LikeAnswer.objects.bulk_create(likes, ignore_conflicts=True)
+
+        print(f"End create {num_likes} answers likes")
 

@@ -19,7 +19,7 @@ db_down:
 
 .PHONY: fill_db
 fill_db:
-	python $(MANGE_PY) fill_db 10000
+	python $(MANGE_PY) fill_db 100
 
 .PHONY: db_clear
 db_clear: db_down db_run
@@ -38,3 +38,10 @@ migrate:
 .PHONY: showmigrations
 showmigrations:
 	python3 $(MANGE_PY) showmigrations
+
+.PHONY: superuser
+superuser:
+	DJANGO_SUPERUSER_USERNAME=admin \
+	DJANGO_SUPERUSER_EMAIL=admin@example.com \
+	DJANGO_SUPERUSER_PASSWORD=admin \
+	python $(MANGE_PY) createsuperuser --noinput
