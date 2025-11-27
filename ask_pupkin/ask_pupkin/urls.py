@@ -28,7 +28,8 @@ urlpatterns = [
     path("question/<int:question_id>/", views.question, name="question"),
     path("ask/", views.ask, name="ask"),
     path("login/", views.login, name="login"),
-    path("registration/", views.registration, name="registration"), 
-    path("settings/", views.settings, name="settings"),
+    path('logout/', views.logout, name='logout'),
+    path("signup/", views.registration, name="registration"), 
+    path("profile/edit/", views.settings, name="settings"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
  

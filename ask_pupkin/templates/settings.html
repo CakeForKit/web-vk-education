@@ -9,65 +9,87 @@
             <div class="d-flex gap-3 align-items-center">
                 <h3>Settings: {{profile.name}}</h3>
             </div>
+
+            <!-- Общие ошибки формы -->
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
             
-            <!-- Login -->
-            <div class="row g-3 align-items-start">
-                <div class="col-3">
-                    <label for="login1" class="col-form-label"> Login </label>
+            <form action="" method="POST" class="col-9 d-flex flex-column gap-3">
+                {% csrf_token %}
+
+                <!-- Login -->
+                <div class="row g-3 align-items-start">
+                    <div class="col-3">
+                        <label for="{{ form.username.id_for_label }}" class="col-form-label">
+                            {{ form.username.label }}
+                        </label>
+                    </div>
+                    <div class="col">
+                        {{ form.username }}
+                    </div>
                 </div>
-                <div class="col">
-                    <input class="form-control" id="login1" type="text" placeholder="{{profile.user.username}}">
+                <!-- Email -->
+                <div class="row g-3 align-items-start">
+                    <div class="col-3">
+                        <label for="{{ form.email.id_for_label }}" class="col-form-label">
+                            {{ form.email.label }}
+                        </label>
+                    </div>
+                    <div class="col">
+                        {{ form.email }}
+                    </div>
                 </div>
-            </div>
-            <!-- Email -->
-            <div class="row g-3 align-items-start">
-                <div class="col-3">
-                    <label for="email1" class="col-form-label">Email</label>
+                <!-- NickName -->
+                <div class="row g-3 align-items-start">
+                    <div class="col-3">
+                        <label for="{{ form.nickname.id_for_label }}" class="col-form-label">
+                            {{ form.nickname.label }}
+                        </label>
+                    </div>
+                    <div class="col">
+                        {{ form.nickname }}
+                    </div>
                 </div>
-                <div class="col">
-                    <input type="email" class="form-control" id="email1" placeholder="{{profile.user.email}}">
-                </div>
-            </div>
-            <!-- NickName -->
-            <div class="row g-3 align-items-start">
-                <div class="col-3">
-                    <label for="NickName1" class="col-form-label">NickName</label>
-                </div>
-                <div class="col">
-                    <input class="form-control" id="NickName1" type="text" placeholder="{{profile.nickname}}">
-                </div>
-            </div>
-            <!-- Avatar -->
-            <div class="row g-3 align-items-start">
-                <div class="col-3">
-                    <label for="avatarUpload" class="col-form-label">Upload Avatar</label>
-                </div>
-                
-                <div class="col">
-                    <div class="d-flex flex-column align-items-start gap-3">
-                        <div class="image-preview" style="width: 80px; height: 80px; border: 1px dashed #dee2e6; display: flex; align-items: center; justify-content: center; background: #f8f9fa;">
-                            <span class="text-muted small">avatar</span>
-                        </div>
-                        <!-- <input class="form-control" type="file" id="avatarUpload" accept="image/*"> -->
-                        <input type="file" id="avatarUpload" accept="image/*" hidden>
-                        <div class="input-group">
-                            <input type="text" class="form-control" placeholder="c:\avatar.jpg" id="fileDisplay" readonly>
-                            <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('avatarUpload').click()">
-                                Choose
-                            </button>
+                <!-- Avatar -->
+                <div class="row g-3 align-items-start">
+                    <div class="col-3">
+                        <label for="{{ form.avatar.id_for_label }}" class="col-form-label">
+                            {{ form.avatar.label }}
+                        </label>
+                    </div>
+                    
+                    <div class="col">
+                        <div class="d-flex flex-column align-items-start gap-3">
+                            <div class="col">
+                                {{ form.avatar }}
+                            </div>
+                            <!-- <div class="image-preview" style="width: 80px; height: 80px; border: 1px dashed #dee2e6; display: flex; align-items: center; justify-content: center; background: #f8f9fa;">
+                                <span class="text-muted small">avatar</span>
+                            </div>
+                            <input type="file" id="avatarUpload" accept="image/*" hidden>
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="c:\avatar.jpg" id="fileDisplay" readonly>
+                                <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('avatarUpload').click()">
+                                    Choose
+                                </button>
+                            </div> -->
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Button -->
-            <div class="row g-3 align-items-start">
-                <div class="col-3"></div>
-                <div class="col">
-                    <button type="button" class="btn btn-outline-dark w-25">Save</button>
+                <!-- Button -->
+                <div class="row g-3 align-items-start">
+                    <div class="col-3"></div>
+                    <div class="col">
+                        <button type="submit" class="btn btn-outline-dark w-25">Save</button>
+                    </div>
                 </div>
-            </div>
-            
+             </form>
         </div>
     </div>
     </main>
