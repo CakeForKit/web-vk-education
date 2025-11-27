@@ -91,6 +91,11 @@ class LikeQuestion(models.Model):
     def __str__(self):
         return f"{self.user} {self.value} вопрос: {self.question}"
     
+class AnswerManager(models.Manager):    
+    def get_for_question(self, question_id): 
+        return self.filter(question_id=question_id).order_by('created_at')
+    
+
 class Answer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     text = models.TextField()
@@ -100,6 +105,8 @@ class Answer(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+    objects = AnswerManager()
+
     def __str__(self):
         return self.text[:50]
     
