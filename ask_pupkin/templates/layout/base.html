@@ -17,14 +17,14 @@
          <a href="{% url 'ask' %}" class="btn btn-outline-success">Ask!</a>
         </form>
         
-        {% if is_authz %}
+        {% if profile %}
           <div class="d-flex gap-2 align-items-center">
             <div class="image">
-              <img src="{% static 'img/avatar.jpg' %}" alt="img"
+              <img src="{{ profile.avatar.url }}" alt="img"
                   style="width: 50px; height: 50px; object-fit: cover;" />
             </div>
             <div class="content">
-              <div class="navbar-brand">Dr. Pepper</div>
+              <div class="navbar-brand"> {{ profile.user.username }} </div>
               <div class="d-inline link-opacity-50-hover"> <a href="{% url 'settings' %}">Settings</a> </div>
               <div class="d-inline link-opacity-50-hover"> <a href="#">Log out</a> </div>
             </div>

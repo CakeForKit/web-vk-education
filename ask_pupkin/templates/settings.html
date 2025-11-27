@@ -7,16 +7,16 @@
         <!-- col-9 - колонка шириной 9/12 от родительской строки -->
         <div class="col-9 d-flex flex-column gap-3">    
             <div class="d-flex gap-3 align-items-center">
-                <h3>Settings: {{person.name}}</h3>
+                <h3>Settings: {{profile.name}}</h3>
             </div>
             
             <!-- Login -->
             <div class="row g-3 align-items-start">
                 <div class="col-3">
-                    <label for="login1" class="col-form-label">Login</label>
+                    <label for="login1" class="col-form-label"> Login </label>
                 </div>
                 <div class="col">
-                    <input class="form-control" id="login1" type="text" placeholder="login">
+                    <input class="form-control" id="login1" type="text" placeholder="{{profile.user.username}}">
                 </div>
             </div>
             <!-- Email -->
@@ -25,7 +25,7 @@
                     <label for="email1" class="col-form-label">Email</label>
                 </div>
                 <div class="col">
-                    <input type="email" class="form-control" id="email1" placeholder="name@example.com">
+                    <input type="email" class="form-control" id="email1" placeholder="{{profile.user.email}}">
                 </div>
             </div>
             <!-- NickName -->
@@ -34,7 +34,7 @@
                     <label for="NickName1" class="col-form-label">NickName</label>
                 </div>
                 <div class="col">
-                    <input class="form-control" id="NickName1" type="text" placeholder="NickName">
+                    <input class="form-control" id="NickName1" type="text" placeholder="{{profile.nickname}}">
                 </div>
             </div>
             <!-- Avatar -->

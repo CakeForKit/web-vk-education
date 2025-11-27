@@ -1,44 +1,12 @@
 from django.shortcuts import render
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.shortcuts import get_object_or_404
+from app.models import Question, Tag, Profile, Answer
 
-IS_AUTHORIZED = True
 
-def question_templ(i):
-    return {
-        'title': 'Question ' + str(i),
-        'id': i,
-        'text': 'text' + str(i),
-        'cnt_likes' : i+2,
-        'cnt_answers' : i+5,
-        'tags' : [{
-            'id': i*j,
-            'title' : 'tag ' + str(i*j),
-        } for j in range(1,4)],
-        # 'answers'
-    }
-
-QUESTIONS = [question_templ(i) for i in range(1,130)]
-
-ANSWERS = [{
-    'text' : 'Answer_text',
-    'is_correct' : i % 2,
-    'cnt_likes' : i+2,
-} for i in range(1,3)]
-
-POPULAT_TAGS = [{
-    'id': i,
-    'title' : 'tag ' + str(i),
-} for i in range(1,9)]
-
-BEST_MEMBERS = [{
-    'id': i,
-    'name' : 'Member name ' + str(i),
-} for i in range(1,5)]
-
-PERSON = {
-    'id': 0,
-    'name' : 'Person name',
-}
+def get_self_profile():
+    return Profile.objects.all()[0]
+    # return None
 
 def paginate(objects_list, request, per_page=5):
     paginator = Paginator(objects_list, per_page) 
@@ -62,68 +30,69 @@ def paginate(objects_list, request, per_page=5):
     return page
 
 def index(request):
-    page = paginate(QUESTIONS, request)
+    questions = Question.objects.get_new()
+    page = paginate(questions, request)
     return render(request, "index.html", context={
        'questions' : page.object_list,
        'page_obj' : page,
-       'popular_tags' : POPULAT_TAGS,
-       'best_members' : BEST_MEMBERS,
-       'is_authz' : IS_AUTHORIZED,
+       'popular_tags' : Tag.objects.get_popular_tags(),
+       'best_members' : Profile.objects.get_best_members_by_answers(),
+       'profile' : get_self_profile(),
     })
 
 def hot(request):
-    page = paginate(QUESTIONS[::-1], request)
+    questions = Question.objects.get_hot_by_answers()
+    page = paginate(questions, request)
     return render(request, "hot.html", context={
        'questions' : page.object_list,
        'page_obj' : page,
-       'popular_tags' : POPULAT_TAGS,
-       'best_members' : BEST_MEMBERS,
-       'is_authz' : IS_AUTHORIZED,
+       'popular_tags' : Tag.objects.get_popular_tags(),
+       'best_members' : Profile.objects.get_best_members_by_answers(),
+       'profile' : get_self_profile(),
     })
 
 def tag(request, tag_id):
-    page = paginate(QUESTIONS[::tag_id], request)
-    TAG = {
-        'id': tag_id,
-        'title' : 'tag ' + str(tag_id),
-    }
+    cur_tag = get_object_or_404(Tag, id=tag_id)
+    questions = Question.objects.by_tag_id(tag_id)
+    page = paginate(questions, request)
     return render(request, "tag.html", context={
        'questions' : page.object_list,
        'page_obj' : page,
-       'popular_tags' : POPULAT_TAGS,
-       'best_members' : BEST_MEMBERS,
-       'is_authz' : IS_AUTHORIZED,
-       'cur_tag' : TAG,
+       'popular_tags' : Tag.objects.get_popular_tags(),
+       'best_members' : Profile.objects.get_best_members_by_answers(),
+       'profile' : get_self_profile(),
+       'cur_tag' : cur_tag,
     })
 
 def question(request, question_id):
+    cur_question = get_object_or_404(Question, id=question_id)
+    answers = Answer.objects.all()
     return render(request, "question.html", context={
-        'question' : question_templ(question_id),
-        'answers' : ANSWERS,
-        'popular_tags' : POPULAT_TAGS,
-        'best_members' : BEST_MEMBERS,
-        'is_authz' : IS_AUTHORIZED,
+        'question' : cur_question,
+        'answers' : answers,
+        'popular_tags' : Tag.objects.get_popular_tags(),
+        'best_members' : Profile.objects.get_best_members_by_answers(),
+        'profile' : get_self_profile(),
     })
 
 def ask(request):
     return render(request, "ask.html", context={
-        'popular_tags' : POPULAT_TAGS,
-        'best_members' : BEST_MEMBERS,
-        'is_authz' : IS_AUTHORIZED,
+        'popular_tags' : Tag.objects.get_popular_tags(),
+        'best_members' : Profile.objects.get_best_members_by_answers(),
+        'profile' : get_self_profile(),
     })
 
 def login(request):
     return render(request, "login.html", context={
-        'is_authz' : IS_AUTHORIZED,
+        'profile' : get_self_profile(),
     })
 
 def registration(request):
     return render(request, "registration.html", context={
-        'is_authz' : IS_AUTHORIZED,
+        'profile' : get_self_profile(),
     })
 
 def settings(request):
     return render(request, "settings.html", context={
-        'person' : PERSON,
-        'is_authz' : True,
+        'profile' : get_self_profile(),
     })
