@@ -1,0 +1,20 @@
+
+<div class="col d-flex flex-column gap-4 mt-5">
+<section>
+    <h4>Popular Tags</h4>
+    <section class="d-flex flex-wrap align-items-baseline">
+        {% for t in popular_tags %}
+        <a href="{% url 'tag' t.id %}" class="link-{% cycle 'primary' 'success' 'danger' 'warning' 'info' %} link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover me-2">
+            {{t.title}}
+        </a>
+        {% endfor %}
+    </section>
+</section>
+<section>
+    <h4>Best Members</h4>
+    {% for member in best_members %}
+    <a href="#">{{member.name}}</a>
+    {% endfor %}
+</section>
+</div>
+ 
