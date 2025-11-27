@@ -70,6 +70,15 @@
                 <div class="col-7">
                     {{ form.nickname }}
                 </div>
+                <div class="col-2">
+                    {% if form.nickname.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.nickname.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
             </div>
             <!-- Password -->
             <div class="row g-3 align-items-start">

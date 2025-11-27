@@ -19,7 +19,7 @@
                 </div>
             {% endif %}
             
-            <form action="" method="POST" class="col-9 d-flex flex-column gap-3">
+            <form action="" method="POST" enctype="multipart/form-data" class="col-9 d-flex flex-column gap-3">
                 {% csrf_token %}
 
                 <!-- Login -->
@@ -29,9 +29,18 @@
                             {{ form.username.label }}
                         </label>
                     </div>
-                    <div class="col">
-                        {{ form.username }}
+                    <div class="col-7">
+                    {{ form.username }}
                     </div>
+                    <div class="col-2">
+                        {% if form.username.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.username.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>  
                 </div>
                 <!-- Email -->
                 <div class="row g-3 align-items-start">
@@ -40,8 +49,17 @@
                             {{ form.email.label }}
                         </label>
                     </div>
-                    <div class="col">
+                    <div class="col-7">
                         {{ form.email }}
+                    </div>
+                    <div class="col-2">
+                        {% if form.email.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.email.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
                 <!-- NickName -->
@@ -51,9 +69,58 @@
                             {{ form.nickname.label }}
                         </label>
                     </div>
-                    <div class="col">
+                    <div class="col-7">
                         {{ form.nickname }}
                     </div>
+                    <div class="col-2">
+                        {% if form.nickname.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.nickname.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <!-- Password -->
+                <div class="row g-3 align-items-start">
+                    <div class="col-3">
+                        <label for="{{ form.password.id_for_label }}" class="col-form-label">
+                            {{ form.password.label }}
+                        </label>
+                    </div>
+                    <div class="col-7">
+                        {{ form.password }}
+                    </div>
+                    <div class="col-2">
+                        {% if form.password.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.password.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>  
+                </div>
+                <!-- Repeat password -->
+                <div class="row g-3 align-items-start">
+                    <div class="col-3">
+                        <label for="{{ form.password2.id_for_label }}" class="col-form-label">
+                            {{ form.password2.label }}
+                        </label>
+                    </div>
+                    <div class="col-7">
+                        {{ form.password2 }}
+                    </div>
+                    <div class="col-2">
+                        {% if form.password2.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.password2.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>  
                 </div>
                 <!-- Avatar -->
                 <div class="row g-3 align-items-start">

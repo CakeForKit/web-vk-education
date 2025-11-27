@@ -7,14 +7,13 @@ from django.urls import reverse, reverse_lazy
 from django.contrib.auth.decorators import login_required
 
 from app.models import Question, Tag, Profile, Answer
-from app.forms import LoginForm, RegisterForm, ProfileEditForm
+from app.forms import LoginForm, RegisterForm, ProfileEditForm, QuestionForm, AnswerForm
 
 def get_self_profile(request):
     if request.user.is_authenticated:
         try:
             return request.user.profile
         except Profile.DoesNotExist:
-            print("----------Profile DoesNotExist for user:", request.user.username)
             return None
     return None
 
@@ -76,20 +75,51 @@ def tag(request, tag_id):
 
 def question(request, question_id):
     cur_question = get_object_or_404(Question, id=question_id)
-    answers = Answer.objects.all()
+    answers = Answer.objects.get_for_question(question_id)
+    profile = get_self_profile(request)
+    if request.method == 'POST':
+        form = AnswerForm(cur_question, profile, request.POST) 
+        if not profile:
+            form.add_error(None, 'You are not authorized.')
+        elif form.is_valid():
+            answer = form.save()
+            print("----------- save \n")
+            print(reverse('question', kwargs={'question_id': cur_question.id}) + f'#answer-{answer.id}', "\n")
+            return HttpResponseRedirect(
+                reverse('question', kwargs={'question_id': cur_question.id})+ f'#answer-{answer.id}'
+            )
+        else:
+            form.add_error(None, 'Invalid input data.')
+    else:
+        form = AnswerForm(cur_question, profile)
     return render(request, "question.html", context={
+        'form': form,
         'question' : cur_question,
         'answers' : answers,
         'popular_tags' : Tag.objects.get_popular_tags(),
         'best_members' : Profile.objects.get_best_members_by_answers(),
-        'profile' : get_self_profile(request),
+        'profile' : profile,
     })
 
+@login_required(login_url=reverse_lazy('login'))
 def ask(request):
-    return render(request, "ask.html", context={
+    profile = get_self_profile(request)
+    if request.method == 'POST':
+        form = QuestionForm(profile, request.POST) 
+        if form.is_valid():
+            question = form.save()
+            return HttpResponseRedirect(
+                reverse('question', kwargs={'question_id': question.id}) 
+            )
+        else:
+            form.add_error(None, 'Invalid input data.')
+    else:
+        form = QuestionForm(profile)
+    return render(request, 'ask.html', context={
+        'form': form,
         'popular_tags' : Tag.objects.get_popular_tags(),
         'best_members' : Profile.objects.get_best_members_by_answers(),
-        'profile' : get_self_profile(request),
+        'profile' : profile,
     })
 
 def login(request):
@@ -130,21 +160,19 @@ def settings(request):
     profile = get_self_profile(request)
     if request.method == 'POST':
         form = ProfileEditForm(
+            profile,
             request.POST, 
-            request.FILES, 
-            profile=profile,
-            # user=request.user
+            request.FILES
         )
         if form.is_valid():
+            form.save()
             return HttpResponseRedirect(reverse('settings'))
+        else:
+            form.add_error(None, 'Invalid input data.')
     else:
-        # Передаем существующие данные в форму
         form = ProfileEditForm(profile=profile)
     
     return render(request, "settings.html", {
         'form': form,
         'profile': profile
     })
-    # return render(request, "settings.html", context={
-    #     'profile' : get_self_profile(request),
-    # })
