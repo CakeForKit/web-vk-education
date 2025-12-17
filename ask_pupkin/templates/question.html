@@ -36,12 +36,34 @@
             {% endfor %}
         </div>
         
-        <div>
-        <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"> Enter your answer here... </textarea>
-        </div>
-        
-        <button type="button" class="btn btn-secondary w-25">Answer</button>
+        <form action="" method="POST" class="col-12 d-flex flex-column gap-3">
+            {% csrf_token %}
 
+            <!-- Общие ошибки формы -->
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div>
+            {{ form.text }}
+            <!-- <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"> Enter your answer here... </textarea> -->
+            </div>
+            <div>
+            {% if form.text.errors %}
+                <div class="text-danger small mt-1">
+                    {% for error in form.text.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            </div>  
+        
+            <button type="submit" class="btn btn-secondary w-25">Answer</button>
+        </form>
     </div>
     {% include "layout/stats.html" %}
 </div>

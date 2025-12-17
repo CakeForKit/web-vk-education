@@ -1,6 +1,10 @@
 DC := ./docker-compose.yml
 MANGE_PY := ./ask_pupkin/manage.py
 
+.PHONY: run 
+run:
+	./run.sh
+
 .PHONY: db_run
 db_run:
 	docker compose -f $(DC) up --build askpupkin_postgres -d

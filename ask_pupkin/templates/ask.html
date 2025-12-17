@@ -9,42 +9,92 @@
         <div class="d-flex gap-3 align-items-center">
             <h3>New Questions</h3>
         </div>
+
+        <!-- Общие ошибки формы -->
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
         
-        <!-- Title -->
-        <div class="row g-3 align-items-start">
-            <div class="col-2">
-                <label for="title1" class="col-form-label">Title</label>
+        <form action="" method="POST" class="col-12 d-flex flex-column gap-3">
+            {% csrf_token %}
+            <!-- Title -->
+            <div class="row g-3 align-items-start">
+                <div class="col-2">
+                    <label for="{{ form.title.id_for_label }}" class="col-form-label">
+                        {{ form.title.label }}
+                    </label>
+                </div>
+                <div class="col-7">
+                    {{ form.title }}
+                </div>
+                <div class="col-2">
+                    {% if form.title.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.title.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>  
             </div>
-            <div class="col">
-                <input class="form-control" id="title1" type="text" placeholder="How to build a moon park?">
+            <!-- Text -->
+            <div class="row g-3 align-items-start">
+                <div class="col-2">
+                    <label for="{{ form.text.id_for_label }}" class="col-form-label">
+                        {{ form.text.label }}
+                    </label>
+                </div>
+                <div class="col-7">
+                    {{ form.text }}
+                </div>
+                <div class="col-2">
+                    {% if form.text.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.text.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div> 
             </div>
-        </div>
-        <!-- Text -->
-        <div class="row g-3 align-items-start">
-            <div class="col-2">
-                <label for="text1" class="col-form-label">Text</label>
+            <!-- Tags -->
+            <div class="row g-3 align-items-start">
+                <!-- <div class="col-2">
+                    <label for="tags1" class="col-form-label">Tags</label>
+                </div>
+                <div class="col">
+                    <input class="form-control" id="tags1" type="text" placeholder="moon, park, puzzle">
+                </div> -->
+                <div class="col-2">
+                    <label for="{{ form.tags.id_for_label }}" class="col-form-label">
+                        {{ form.tags.label }}
+                    </label>
+                </div>
+                <div class="col-7">
+                    {{ form.tags }}
+                </div>
+                <div class="col-2">
+                    {% if form.tags.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.tags.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div> 
             </div>
-            <div class="col">
-                <textarea class="form-control" id="text1" rows="5" placeholder="Write text here"></textarea>
+            <!-- Button -->
+            <div class="row g-3 align-items-start">
+                <div class="col-2"></div>
+                <div class="col">
+                    <button type="submit" class="btn btn-outline-dark w-25">Ask!</button>
+                </div>
             </div>
-        </div>
-        <!-- Tags -->
-        <div class="row g-3 align-items-start">
-            <div class="col-2">
-                <label for="tags1" class="col-form-label">Title</label>
-            </div>
-            <div class="col">
-                <input class="form-control" id="tags1" type="text" placeholder="moon, park, puzzle">
-            </div>
-        </div>
-        <!-- Button -->
-        <div class="row g-3 align-items-start">
-            <div class="col-2"></div>
-            <div class="col">
-                <button type="button" class="btn btn-outline-dark w-25">Ask!</button>
-            </div>
-        </div>
-        
+        </form>
     </div>
     {% include "layout/stats.html" %}
 </div>
