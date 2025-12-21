@@ -1,25 +1,25 @@
 services:
-  askpupkin_postgres:
-    container_name: askpupkin_postgres
+  askpermyakova_postgres:
+    container_name: askpermyakova_postgres
     image: postgres:14.8-alpine3.18
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_DB: ask_pupkin_db     
+      POSTGRES_DB: ask_permyakova_db     
       POSTGRES_USER: uuser            
       POSTGRES_PASSWORD: ppassword
     volumes:
-      - pg-askpupkin-vol:/var/lib/postgresql/data
+      - pg-askpermyakova-vol:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U uuser -d ask_pupkin_db" ]
+      test: [ "CMD-SHELL", "pg_isready -U uuser -d ask_permyakova_db" ]
       interval: 5s
       timeout: 5s
       retries: 10
       start_period: 60s
     # networks:
-    #   - postgres-askpupkin-net
+    #   - postgres-askpermyakova-net
 
 volumes:
-  pg-askpupkin-vol:
+  pg-askpermyakova-vol:
     driver: local
     

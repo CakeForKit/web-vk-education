@@ -1,5 +1,5 @@
 #!/bin/bash
 
 source ./venv/bin/activate && \
-cd ask_pupkin && \
+cd ask_permyakova && \
 python3 manage.py runserver

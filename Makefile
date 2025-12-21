@@ -1,5 +1,5 @@
 DC := ./docker-compose.yml
-MANGE_PY := ./ask_pupkin/manage.py
+MANGE_PY := ./ask_permyakova/manage.py
 
 .PHONY: run 
 run:
@@ -7,19 +7,19 @@ run:
 
 .PHONY: db_run
 db_run:
-	docker compose -f $(DC) up --build askpupkin_postgres -d
+	docker compose -f $(DC) up --build askpermyakova_postgres -d
 
 .PHONY: db_start
 db_start:
-	docker compose -f $(DC) start askpupkin_postgres 
+	docker compose -f $(DC) start askpermyakova_postgres 
 
 .PHONY: db_stop
 db_stop:
-	docker compose -f $(DC) stop askpupkin_postgres 
+	docker compose -f $(DC) stop askpermyakova_postgres 
 
 .PHONY: db_down
 db_down:
-	docker compose -f $(DC) down -v askpupkin_postgres 
+	docker compose -f $(DC) down -v askpermyakova_postgres 
 
 .PHONY: fill_db
 fill_db:
@@ -30,7 +30,7 @@ db_clear: db_down db_run
 
 .PHONY: remakemigrations
 remakemigrations:
-	find ./ask_pupkin/app/migrations/ -type f ! -name '__init__.py' -delete
+	find ./ask_permyakova/app/migrations/ -type f ! -name '__init__.py' -delete
 	python3 $(MANGE_PY) makemigrations
 	python3 $(MANGE_PY) migrate
 	make fill_db
