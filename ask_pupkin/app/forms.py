@@ -24,8 +24,13 @@ class RegisterForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field_name, field in self.fields.items():
-            field.widget.attrs['class'] = 'form-control'
-        self.fields['avatar'].widget.attrs['accept'] = 'image/*'
+            if field_name != 'avatar':
+                field.widget.attrs['class'] = 'form-control'
+        self.fields['avatar'].widget.attrs = {
+            'accept' : 'image/*',
+            'class'  : "form-control",
+            'id': 'avatarUpload',
+        }
 
     def clean_username(self):
         username = self.cleaned_data['username']
@@ -60,12 +65,19 @@ class RegisterForm(forms.Form):
             password=password
         )
         user.save()
-        profile = Profile.objects.create(
-            user=user, 
-            nickname=nickname
-        )
+        
         if avatar:
-            profile.avatar = avatar
+            profile = Profile.objects.create(
+                user=user, 
+                nickname=nickname,
+                avatar=avatar
+            )
+        else:
+            profile = Profile.objects.create(
+                user=user, 
+                nickname=nickname
+            )
+        profile.save()
         return user
     
 class ProfileEditForm(forms.Form):

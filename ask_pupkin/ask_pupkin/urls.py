@@ -31,5 +31,8 @@ urlpatterns = [
     path('logout/', views.logout, name='logout'),
     path("signup/", views.registration, name="registration"), 
     path("profile/edit/", views.settings, name="settings"),
+    path('question/<int:question_id>/like', views.like_question, name='like_question'),
+    path('answer/<int:answer_id>/like', views.like_answer, name='like_answer'),
+    path('answer/<int:answer_id>/mark-correct', views.mark_answer_correct, name='mark_answer_correct'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
  
