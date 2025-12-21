@@ -1,4 +1,48 @@
 services:
+  askpermyakova_app:
+    container_name: askpermyakova_app
+    build:
+      context: .
+      dockerfile: ./Dockerfile 
+    # ports:
+    #   - "8000:8000"
+    environment:
+      POSTGRES_HOST: askpermyakova_postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ask_permyakova_db     
+      POSTGRES_USER: uuser            
+      POSTGRES_PASSWORD: ppassword
+    depends_on:
+      askpermyakova_postgres:
+        condition: service_healthy  
+    networks:
+      - postgres-askpermyakova-net
+      - nginx-askpermyakova-net
+
+  askpermyakova_nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d/:ro
+      # - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      # - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./ask_permyakova/static/:/usr/share/nginx/static/
+      - ./ask_permyakova/uploads/:/usr/share/nginx/uploads/
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - nginx-askpermyakova-net
+
   askpermyakova_postgres:
     container_name: askpermyakova_postgres
     image: postgres:14.8-alpine3.18
@@ -16,10 +60,30 @@ services:
       timeout: 5s
       retries: 10
       start_period: 60s
-    # networks:
-    #   - postgres-askpermyakova-net
+    networks:
+      - postgres-askpermyakova-net
+
+
+  gunicorn:
+    container_name: gunicorn
+    build: .
+    command: sh -c "cd /gunicorn && gunicorn -c ./config.py simple"
+    volumes:
+      - ./gunicorn:/gunicorn
+    ports:
+      - "8081:8081"
+    networks:
+      - nginx-askpermyakova-net
 
 volumes:
   pg-askpermyakova-vol:
     driver: local
-    
+
+networks:
+  postgres-askpermyakova-net:
+    driver: bridge
+    name: postgres-askpermyakova-net
+
+  nginx-askpermyakova-net:
+    driver: bridge
+    name: nginx-askpermyakova-net

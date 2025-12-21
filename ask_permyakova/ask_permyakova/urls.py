@@ -34,5 +34,10 @@ urlpatterns = [
     path('question/<int:question_id>/like', views.like_question, name='like_question'),
     path('answer/<int:answer_id>/like', views.like_answer, name='like_answer'),
     path('answer/<int:answer_id>/mark-correct', views.mark_answer_correct, name='mark_answer_correct'),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+    path("benchmark_test/dynamic", views.dynamic_bench, name="dynamic_benchmark_test"),
+    path("benchmark_test/static", views.static_bench, name="static_benchmark_test"),
+] 
+# + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
  

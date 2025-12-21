@@ -3,14 +3,16 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import get_object_or_404
 from django.contrib import auth
 from django.contrib.auth.models import User
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponse, Http404
 from django.urls import reverse, reverse_lazy
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth.decorators import login_required
 from django.db.models import OuterRef, Subquery, Value,  IntegerField
 from django.db.models.functions import Coalesce
 import json
+import os
 
+from ask_permyakova.settings import STATIC_URL
 from app.models import Question, Tag, Profile, Answer, LikeQuestion, LikeAnswer
 from app.forms import LoginForm, RegisterForm, ProfileEditForm, QuestionForm, AnswerForm
 
@@ -275,3 +277,23 @@ def mark_answer_correct(request, answer_id):
         return JsonResponse({'error': 'JSONDecodeError'}, status=400)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+    
+
+import random
+import string
+
+@require_GET
+def dynamic_bench(request):
+    kb_data = 30
+    content = ''.join(random.choices(string.ascii_letters + ' ', k=kb_data * 1024))
+    return HttpResponse(content, content_type='text/plain')
+
+@require_GET
+def static_bench(request):
+    static_file = os.path.join(STATIC_URL, 'test_30kb.txt')
+    try:
+        with open(static_file, 'rb') as f:
+            file_content = f.read()
+        return HttpResponse(file_content, content_type='text/plain')
+    except FileNotFoundError:
+        raise Http404(f"File not found: {static_file}")

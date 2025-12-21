@@ -1,9 +1,27 @@
 DC := ./docker-compose.yml
 MANGE_PY := ./ask_permyakova/manage.py
 
-.PHONY: run 
-run:
-	./run.sh
+.PHONY: app_run 
+app_run:
+	docker compose -f $(DC) build askpermyakova_app
+	docker compose -f $(DC) up askpermyakova_app
+# 	./run.sh
+
+.PHONY: app_down
+app_down:
+	docker compose -f $(DC) down -v askpermyakova_app 
+
+.PHONY: restart_nginx
+restart_nginx:
+	docker compose -f $(DC) restart askpermyakova_nginx
+
+.PHONY: nginx_run
+nginx_run:
+	docker compose -v -f $(DC) up --build askpermyakova_nginx -d
+
+.PHONY: nginx_down
+nginx_down:
+	docker compose -f $(DC) down -v askpermyakova_nginx
 
 .PHONY: db_run
 db_run:
@@ -49,3 +67,11 @@ superuser:
 	DJANGO_SUPERUSER_EMAIL=admin@example.com \
 	DJANGO_SUPERUSER_PASSWORD=admin \
 	python $(MANGE_PY) createsuperuser --noinput
+
+.PHONY: gunicorn_run
+gunicorn_run:
+	docker compose -v -f $(DC) up --build gunicorn
+
+.PHONY: gunicorn_down
+gunicorn_down:
+	docker compose -f $(DC) down -v gunicorn
