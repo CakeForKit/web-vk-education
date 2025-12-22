@@ -1,15 +1,26 @@
 DC := ./docker-compose.yml
 MANGE_PY := ./ask_permyakova/manage.py
 
+.PHONY: all
+all: db_start nginx_run app_run centrifugo_up
+
 .PHONY: app_run 
 app_run:
 	docker compose -f $(DC) build askpermyakova_app
-	docker compose -f $(DC) up askpermyakova_app
+	docker compose -f $(DC) up askpermyakova_app -d
 # 	./run.sh
 
 .PHONY: app_down
 app_down:
 	docker compose -f $(DC) down -v askpermyakova_app 
+
+.PHONY: centrifugo_up
+centrifugo_up:
+	docker compose -f $(DC) up --build askpermyakova_centrifugo -d
+
+.PHONY: centrifugo_down
+centrifugo_down:
+	docker compose -f $(DC) down -v askpermyakova_centrifugo 
 
 .PHONY: restart_nginx
 restart_nginx:

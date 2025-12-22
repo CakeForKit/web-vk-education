@@ -37,7 +37,7 @@
             </div>
         </div>
         </div>
-        <div class="d-flex flex-column gap-3 border-top border-bottom py-3">
+        <div class="d-flex flex-column gap-3 border-top border-bottom py-3" id="answers-container">
             {% for a in answers %}
             {% include "layout/one_answer.html" with answer=a %}
             {% endfor %}
@@ -74,5 +74,62 @@
     </div>
     {% include "layout/stats.html" %}
 </div>
+
+<script src="https://unpkg.com/centrifuge@5.0.0/dist/centrifuge.js"></script>
+<script>
+
+    const CENTRIFUGO_DOMAIN = '{{ centrifugo.domain }}';
+    const CENTRIFUGO_TOKEN = '{{ centrifugo.token }}';
+    const client = new Centrifuge(`ws://${CENTRIFUGO_DOMAIN}/connection/websocket`, {
+        token: CENTRIFUGO_TOKEN
+    });
+    client.on('connecting', function(ctx) {
+        console.log('connecting', ctx);
+    });
+    client.on('connected', function(ctx) {
+        console.log('connected', ctx);
+    });
+    client.on('disconnected', function(ctx) {
+        console.log('disconnected', ctx);
+    });
+
+    const sub = client.newSubscription('{{ centrifugo.channel_name }}');
+    sub.on("subscribed", function(ctx) {
+        console.log("Subscribed to channel: ", ctx.channel);
+    })
+    sub.on('publication', function(ctx) {
+        console.log("New answer received:", ctx);
+        if (ctx.data.answer_id) {
+            loadAnswerHtml(ctx.data.answer_id);
+        }
+    });
+    sub.subscribe();
+    client.connect();
+
+    function loadAnswerHtml(answerId) {
+        fetch(`/answer/html/${answerId}/`, {
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.html) {
+                addAnswerToPage(data.html);
+            } else if (data.error) {
+                console.error('Error:', data.error);
+            }
+        })
+        .catch(error => console.error('Fetch error:', error));
+    }
+    function addAnswerToPage(html) {
+        const answersContainer = document.getElementById('answers-container');
+        if (answersContainer) {
+            answersContainer.innerHTML += html;
+        }
+    }
+</script>
 </main>
 {% endblock %}

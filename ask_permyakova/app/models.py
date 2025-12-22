@@ -123,6 +123,17 @@ class Answer(models.Model):
         return self.likes.aggregate(
             total=models.Sum('value')
         )['total'] or 0
+    
+    def as_dict(self):
+        return {
+            "id": self.id,
+            # "question"
+            "text": self.text,
+            "is_correct": self.is_correct,
+            # "user"
+            "created_at": self.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+            "updated_at": self.updated_at.strftime("%Y-%m-%d %H:%M:%S")
+        }
 
     
 class LikeAnswer(models.Model):

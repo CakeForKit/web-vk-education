@@ -9,12 +9,16 @@ from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth.decorators import login_required
 from django.db.models import OuterRef, Subquery, Value,  IntegerField
 from django.db.models.functions import Coalesce
+from django.template.loader import render_to_string
 import json
 import os
 
-from ask_permyakova.settings import STATIC_URL
+from ask_permyakova.settings import STATIC_URL, CENTRIFUGO_SECRET_KEY, CENTRIFUGO_DOMAIN, CENTRIFUGO_API_KEY
 from app.models import Question, Tag, Profile, Answer, LikeQuestion, LikeAnswer
 from app.forms import LoginForm, RegisterForm, ProfileEditForm, QuestionForm, AnswerForm
+from cent import Client, PublishRequest
+import time
+import jwt
 
 def get_self_profile(request):
     if request.user.is_authenticated:
@@ -105,7 +109,27 @@ def tag(request, tag_id):
        'cur_tag' : cur_tag,
     })
 
+def get_centrifugo_token(user):
+    now = int(time.time())
+    payload = {
+        'sub': str(user.id) if user and user.id else 'anonymous',
+        'exp': now + 3600, # seconds
+        'iat': now,  # issued at - время выдачи
+    }
+    return jwt.encode(payload, CENTRIFUGO_SECRET_KEY, algorithm="HS256")
+
+def push_to_centrifugo(channel, payload):
+    api_url = f"http://{CENTRIFUGO_DOMAIN}/api"
+    api_key = CENTRIFUGO_API_KEY
+
+    client = Client(api_url, api_key)
+    request = PublishRequest(channel=channel, data=payload)
+    result = client.publish(request)
+    print(result)
+    return result
+
 def question(request, question_id):
+    channel_name = f"question_{question_id}"
     profile = get_self_profile(request)
     cur_question = get_object_or_404(Question, id=question_id)
     cur_question.user_vote = cur_question.is_liked(profile)
@@ -117,6 +141,7 @@ def question(request, question_id):
             form.add_error(None, 'You are not authorized.')
         elif form.is_valid():
             answer = form.save()
+            push_to_centrifugo(channel_name, {"answer_id": answer.id})
             return HttpResponseRedirect(
                 reverse('question', kwargs={'question_id': cur_question.id})+ f'#answer-{answer.id}'
             )
@@ -124,6 +149,7 @@ def question(request, question_id):
             form.add_error(None, 'Invalid input data.')
     else:
         form = AnswerForm(cur_question, profile)
+        
     return render(request, "question.html", context={
         'form': form,
         'question' : cur_question,
@@ -131,7 +157,21 @@ def question(request, question_id):
         'popular_tags' : Tag.objects.get_popular_tags(),
         'best_members' : Profile.objects.get_best_members_by_answers(),
         'profile' : profile,
+        'centrifugo': {
+            'channel_name': channel_name,
+            'domain': CENTRIFUGO_DOMAIN,
+            'token': get_centrifugo_token(profile.user)
+        }
     })
+
+def get_one_answer_html(request, answer_id):
+    try:
+        profile = get_self_profile(request)
+        answer = Answer.objects.get(id=answer_id)
+        html = render_to_string('layout/one_answer.html', {'answer': answer, 'profile': profile})
+        return JsonResponse({'html': html})
+    except Answer.DoesNotExist:
+        return JsonResponse({'error': 'Answer not found'}, status=404)
 
 @login_required(login_url=reverse_lazy('login'))
 def ask(request):

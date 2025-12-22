@@ -145,3 +145,7 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CENTRIFUGO_DOMAIN = '127.0.0.1:9000'
+CENTRIFUGO_SECRET_KEY = "my_secret"
+CENTRIFUGO_API_KEY = "my_api_key"

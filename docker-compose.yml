@@ -19,6 +19,19 @@ services:
       - postgres-askpermyakova-net
       - nginx-askpermyakova-net
 
+  askpermyakova_centrifugo:
+    container_name: askpermyakova_centrifugo
+    image: centrifugo/centrifugo:v6
+    volumes:
+      - ./centrifugo:/centrifugo
+    command: centrifugo -c config.json
+    ports:
+      - 9000:8000
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+
   askpermyakova_nginx:
     image: nginx:alpine
     restart: unless-stopped
@@ -62,7 +75,6 @@ services:
       start_period: 60s
     networks:
       - postgres-askpermyakova-net
-
 
   gunicorn:
     container_name: gunicorn
