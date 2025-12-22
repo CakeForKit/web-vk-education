@@ -10,16 +10,21 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import OuterRef, Subquery, Value,  IntegerField
 from django.db.models.functions import Coalesce
 from django.template.loader import render_to_string
+from django.core.cache import caches
 import json
 import os
 
-from ask_permyakova.settings import STATIC_URL, CENTRIFUGO_SECRET_KEY, CENTRIFUGO_DOMAIN, CENTRIFUGO_API_KEY
+from ask_permyakova.settings import STATIC_URL, \
+    CENTRIFUGO_SECRET_KEY, CENTRIFUGO_DOMAIN, CENTRIFUGO_API_KEY, \
+        REDIS_KEY_POPULAR_TAGS, REDIS_TIMEOUT_POPULAR_TAGS, \
+        REDIS_KEY_BEST_MEMBERS, REDIS_TIMEOUT_BEST_MEMBERS
 from app.models import Question, Tag, Profile, Answer, LikeQuestion, LikeAnswer
 from app.forms import LoginForm, RegisterForm, ProfileEditForm, QuestionForm, AnswerForm
 from ask_permyakova.celery import app
 from cent import Client, PublishRequest
 import time
 import jwt
+
 
 def get_self_profile(request):
     if request.user.is_authenticated:
@@ -69,6 +74,43 @@ def add_user_vote_for_questions(questions, profile):
         )
     return questions
 
+@app.task(ignore_result=True)
+def update_cache_popular_tags():
+    client = caches['default']
+    popular_tags = Tag.objects.get_popular_tags()
+    json_str = json.dumps([x.to_dict() for x in popular_tags])
+    print(f"Get popular tags from DATEBASE")
+    client.set(REDIS_KEY_POPULAR_TAGS, json_str, timeout=REDIS_TIMEOUT_POPULAR_TAGS)
+    return popular_tags
+
+def get_popular_tags():
+    client = caches['default']
+    json_popular_tags = client.get(REDIS_KEY_POPULAR_TAGS)
+    if json_popular_tags is None:
+        return update_cache_popular_tags()
+    popular_tags = [Tag.from_dict(x) for x in json.loads(json_popular_tags)]
+    print("Get cached popular_tags!")
+    return popular_tags
+
+@app.task(ignore_result=True)
+def update_cache_best_members_by_answers():
+    client = caches['default']
+    best_members = Profile.objects.get_best_members_by_answers()
+    json_str = json.dumps([x.to_dict() for x in best_members])
+    print(f"Get best members from DATEBASE")
+    client.set(REDIS_KEY_BEST_MEMBERS, json_str, timeout=REDIS_TIMEOUT_BEST_MEMBERS)
+    return best_members
+
+def get_best_members_by_answers():
+    client = caches['default']
+    json_best_members = client.get(REDIS_KEY_BEST_MEMBERS)
+    if json_best_members is None:
+        return update_cache_best_members_by_answers()
+    best_members = [Profile.from_dict(x) for x in json.loads(json_best_members)]
+    print("Get cached best_members!")
+    return best_members
+
+
 def index(request):
     profile = get_self_profile(request)
     questions = Question.objects.get_new()
@@ -77,8 +119,8 @@ def index(request):
     return render(request, "index.html", context={
        'questions' : page.object_list,
        'page_obj' : page,
-       'popular_tags' : Tag.objects.get_popular_tags(),
-       'best_members' : Profile.objects.get_best_members_by_answers(),
+       'popular_tags' : get_popular_tags(),
+       'best_members' : get_best_members_by_answers(),
        'profile' : profile,
     })
 
@@ -90,8 +132,8 @@ def hot(request):
     return render(request, "hot.html", context={
        'questions' : page.object_list,
        'page_obj' : page,
-       'popular_tags' : Tag.objects.get_popular_tags(),
-       'best_members' : Profile.objects.get_best_members_by_answers(),
+       'popular_tags' : get_popular_tags(),
+       'best_members' : get_best_members_by_answers(),
        'profile' : profile,
     })
 
@@ -104,8 +146,8 @@ def tag(request, tag_id):
     return render(request, "tag.html", context={
        'questions' : page.object_list,
        'page_obj' : page,
-       'popular_tags' : Tag.objects.get_popular_tags(),
-       'best_members' : Profile.objects.get_best_members_by_answers(),
+       'popular_tags' : get_popular_tags(),
+       'best_members' : get_best_members_by_answers(),
        'profile' : profile,
        'cur_tag' : cur_tag,
     })
@@ -176,8 +218,8 @@ def question(request, question_id):
         'form': form,
         'question' : cur_question,
         'answers' : answers,
-        'popular_tags' : Tag.objects.get_popular_tags(),
-        'best_members' : Profile.objects.get_best_members_by_answers(),
+        'popular_tags' : get_popular_tags(),
+        'best_members' : get_best_members_by_answers(),
         'profile' : profile,
         'centrifugo': {
             'channel_name': channel_name,
@@ -212,8 +254,8 @@ def ask(request):
         form = QuestionForm(profile)
     return render(request, 'ask.html', context={
         'form': form,
-        'popular_tags' : Tag.objects.get_popular_tags(),
-        'best_members' : Profile.objects.get_best_members_by_answers(),
+        'popular_tags' : get_popular_tags(),
+        'best_members' : get_best_members_by_answers(),
         'profile' : profile,
     })
 

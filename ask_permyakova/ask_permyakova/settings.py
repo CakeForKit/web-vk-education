@@ -161,3 +161,19 @@ redis_url = f"redis://{redis_username}:{redis_password}@{redis_host}:{redis_port
 CELERY_BROKER_URL = redis_url
 CELERY_RESULT_BACKEND = redis_url
 print(f"CELERY_BROKER_URL: {CELERY_BROKER_URL}")
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": redis_url,
+    }
+}
+
+# Cache configs
+REDIS_KEY_POPULAR_TAGS = 'popular_tags'
+REDIS_AUTO_UPDATE_POPULAR_TAGS = 15
+REDIS_TIMEOUT_POPULAR_TAGS = 30
+
+REDIS_KEY_BEST_MEMBERS = 'best_members_by_answers'
+REDIS_AUTO_UPDATE_BEST_MEMBERS = 15
+REDIS_TIMEOUT_BEST_MEMBERS = 30

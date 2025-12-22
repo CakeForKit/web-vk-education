@@ -8,4 +8,6 @@ RUN pip install -r requirements.txt
 COPY . .
 WORKDIR /app/ask_permyakova
 
-CMD ["celery", "-A", "ask_permyakova", "worker", "-l", "INFO"]
+# celery -A ask_permyakova.celery worker --beat --loglevel=info
+CMD ["celery", "-A", "ask_permyakova.celery", "worker", "--beat", "--loglevel=info"]
+# CMD ["celery", "-A", "ask_permyakova", "worker", "-l", "INFO"]

@@ -91,6 +91,11 @@ services:
       context: .
       dockerfile: ./celery/Dockerfile
     environment:
+      POSTGRES_HOST: askpermyakova_postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ask_permyakova_db     
+      POSTGRES_USER: uuser            
+      POSTGRES_PASSWORD: ppassword
       REDIS_HOST: askpermyakova_redis
       REDIS_PORT: 6379
       REDIS_USER: kredis
@@ -99,6 +104,7 @@ services:
       CENTRIFUGO_PORT: 8000
     networks:
       - celery-askpermyakova-net
+      - postgres-askpermyakova-net
 
   askpermyakova_redis:
     container_name: askpermyakova_redis
