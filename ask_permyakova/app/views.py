@@ -16,7 +16,7 @@ import json
 import os
 
 from ask_permyakova.settings import STATIC_URL, \
-    CENTRIFUGO_SECRET_KEY, CENTRIFUGO_DOMAIN, CENTRIFUGO_API_KEY, \
+    CENTRIFUGO_SECRET_KEY, LOCAL_CENTRIFUGO_DOMAIN, CENTRIFUGO_DOMAIN, CENTRIFUGO_API_KEY, \
         REDIS_KEY_POPULAR_TAGS, REDIS_TIMEOUT_POPULAR_TAGS, \
         REDIS_KEY_BEST_MEMBERS, REDIS_TIMEOUT_BEST_MEMBERS
 from app.models import Question, Tag, Profile, Answer, LikeQuestion, LikeAnswer
@@ -140,7 +140,6 @@ def get_best_members_by_answers():
     print("Get cached best_members!")
     return best_members
 
-
 def index(request):
     profile = get_self_profile(request)
     questions = Question.objects.get_new()
@@ -205,16 +204,19 @@ def get_centrifugo_token(profile):
     now = int(time.time())
     payload = {
         'sub': str(profile.user.id) if profile and profile.user.id else 'anonymous',
-        'exp': now + 3600, # seconds
+        'exp': now + 3600 * 8, # seconds
         'iat': now,  # issued at - время выдачи
     }
-    return jwt.encode(payload, CENTRIFUGO_SECRET_KEY, algorithm="HS256")
+    token = jwt.encode(payload, CENTRIFUGO_SECRET_KEY, algorithm="HS256")
+    print(f"token: {token}")
+    return token
 
 @app.task(ignore_result=True)
 def push_to_centrifugo(channel, payload):
     api_url = f"http://{CENTRIFUGO_DOMAIN}/api"
     api_key = CENTRIFUGO_API_KEY
 
+    print(f"PUSH_TO_CENTRIFUGO: {api_url}\n\n")
     client = Client(api_url, api_key)
     request = PublishRequest(channel=channel, data=payload)
     result = client.publish(request)
@@ -253,7 +255,7 @@ def question(request, question_id):
         'profile' : profile,
         'centrifugo': {
             'channel_name': channel_name,
-            'domain': CENTRIFUGO_DOMAIN,
+            'domain': LOCAL_CENTRIFUGO_DOMAIN,
             'token': get_centrifugo_token(profile)
         }
     })

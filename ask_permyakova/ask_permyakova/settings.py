@@ -148,6 +148,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 centrifugo_host = os.environ.get('CENTRIFUGO_HOST', '127.0.0.1') 
 centrifugo_port = os.environ.get('CENTRIFUGO_PORT', '9000') 
+LOCAL_CENTRIFUGO_DOMAIN = '127.0.0.1:9000'
 CENTRIFUGO_DOMAIN = f'{centrifugo_host}:{centrifugo_port}'
 CENTRIFUGO_SECRET_KEY = "my_secret"
 CENTRIFUGO_API_KEY = "my_api_key"

@@ -2,7 +2,7 @@ DC := ./docker-compose.yml
 MANGE_PY := ./ask_permyakova/manage.py
 
 .PHONY: all
-all: db_start nginx_run app_run centrifugo_up
+all: db_start redis_up app_run celery_up centrifugo_up nginx_run
 
 .PHONY: app_run 
 app_run:
