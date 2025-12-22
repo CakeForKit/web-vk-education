@@ -12,9 +12,22 @@
     <div class="container-fluid">
         <a href="{% url 'index' %}" class="navbar-brand text-decoration-none">AskPermyakova</a>
         <form class="d-flex" role="search">
-        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"/>
-        <!-- <button class="btn btn-outline-success" type="submit">Ask!</button> -->
-         <a href="{% url 'ask' %}" class="btn btn-outline-success">Ask!</a>
+          <div class="dropdown">
+            <input class="form-control me-2" 
+                  id="search-input"
+                  type="search" 
+                  placeholder="Search" 
+                  aria-label="Search"
+                  data-bs-toggle="dropdown">
+            
+            <ul class="dropdown-menu w-100" id="search-results">
+                <!-- <li><span class="dropdown-item-text">Type to search...</span></li> -->
+                <li><a class="dropdown-item" href="#">Example result 1----------------</a></li>
+                <li><a class="dropdown-item" href="#">Example result 2</a></li>
+            </ul>
+          </div>
+          <!-- <button class="btn btn-outline-success" type="submit">Ask!</button> -->
+          <a href="{% url 'ask' %}" class="btn btn-outline-success">Ask!</a>
         </form>
         
         {% if profile %}
@@ -45,4 +58,45 @@
     <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'app.js' %}"></script>
 </body>
+
+<script>
+let searchTimer;
+const searchInput = document.getElementById('search-input');
+if (searchInput) {
+    
+    const newInput = document.getElementById('search-input');
+    newInput.addEventListener('input', function(e) {
+        console.log('Input event:', e.target.value); 
+        
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => {
+            searchQuestions(e.target.value.trim());
+        }, 500); 
+    });
+}
+
+function searchQuestions(query) {
+    if (query.length < 2) {
+        return;
+    }
+    
+    fetch(`/search/question/?q=${encodeURIComponent(query)}`)
+        .then(r => r.json())
+        .then(data => {
+            const results = document.getElementById('search-results');
+            if (data.results.length === 0) {
+                results.innerHTML = '<li><span class="dropdown-item-text">No results</span></li>';
+                return;
+            }
+            
+            let html = '';
+            data.results.forEach(item => {
+                html += `<li><a class="dropdown-item" href="${item.url}">${item.title}</a></li>`;
+            });
+            results.innerHTML = html;
+            
+            new bootstrap.Dropdown(document.getElementById('search-input')).show();
+        });
+}
+</script>
 </html>

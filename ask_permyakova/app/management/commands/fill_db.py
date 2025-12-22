@@ -3,6 +3,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.contrib.auth.hashers import make_password
+from django.contrib.postgres.search import SearchVector
 from app.models import Profile, Tag, Question, Answer, LikeQuestion, LikeAnswer
 
 
@@ -33,6 +34,7 @@ class Command(BaseCommand):
             self.create_answers(num_answers)
             self.create_likes_questions(num_likes)
             self.create_likes_answers(num_likes)
+            Question.objects.update(search_vector=SearchVector('title', 'text'))
         
         self.stdout.write(
             self.style.SUCCESS('Successfully filled database with test data')

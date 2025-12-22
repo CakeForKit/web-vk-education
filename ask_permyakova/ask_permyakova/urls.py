@@ -35,6 +35,7 @@ urlpatterns = [
     path('answer/<int:answer_id>/like', views.like_answer, name='like_answer'),
     path('answer/<int:answer_id>/mark-correct', views.mark_answer_correct, name='mark_answer_correct'),
     path('answer/html/<int:answer_id>/',views. get_one_answer_html, name='get_one_answer_html'),
+    path('search/question/', views.search_question, name='search_question'),
 
     path("benchmark_test/dynamic", views.dynamic_bench, name="dynamic_benchmark_test"),
     path("benchmark_test/static", views.static_bench, name="static_benchmark_test"),

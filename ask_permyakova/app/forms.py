@@ -169,6 +169,7 @@ class QuestionForm(forms.Form):
             text=text,
             user=self.profile  
         )
+        question.save()
         question.mm_tags.set(tags)
         return question
     

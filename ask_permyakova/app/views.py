@@ -11,6 +11,7 @@ from django.db.models import OuterRef, Subquery, Value,  IntegerField
 from django.db.models.functions import Coalesce
 from django.template.loader import render_to_string
 from django.core.cache import caches
+from django.contrib.postgres.search import SearchQuery, SearchRank
 import json
 import os
 
@@ -25,6 +26,35 @@ from cent import Client, PublishRequest
 import time
 import jwt
 
+
+@require_GET
+def search_question(request):
+    query = request.GET.get('q', '').strip()
+    if len(query) < 2:  
+        return JsonResponse({'results': []})
+    
+    print("Search: ", query)
+    
+    search_query = SearchQuery(query)
+    results = Question.objects.annotate(
+        rank=SearchRank('search_vector', search_query)
+    ).filter(
+        search_vector=search_query
+    ).order_by('-rank')[:10]  
+
+    print("Results: ", results)
+    
+    suggestions = [
+        {
+            'id': q.id,
+            'title': q.title,
+            'text': q.text[:150] + '...' if len(q.text) > 150 else q.text,
+            'url': reverse('question', args=[q.id]),
+        }
+        for q in results
+    ]
+    
+    return JsonResponse({'results': suggestions})
 
 def get_self_profile(request):
     if request.user.is_authenticated:
@@ -171,10 +201,10 @@ def add_user_vote_for_answers(answers, profile):
         )
     return answers
 
-def get_centrifugo_token(user):
+def get_centrifugo_token(profile):
     now = int(time.time())
     payload = {
-        'sub': str(user.id) if user and user.id else 'anonymous',
+        'sub': str(profile.user.id) if profile and profile.user.id else 'anonymous',
         'exp': now + 3600, # seconds
         'iat': now,  # issued at - время выдачи
     }
@@ -224,7 +254,7 @@ def question(request, question_id):
         'centrifugo': {
             'channel_name': channel_name,
             'domain': CENTRIFUGO_DOMAIN,
-            'token': get_centrifugo_token(profile.user)
+            'token': get_centrifugo_token(profile)
         }
     })
 

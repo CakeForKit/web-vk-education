@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime
+from django.contrib.postgres.search import SearchVectorField, SearchVector
+from django.contrib.postgres.indexes import GinIndex
 
 class ProfileManager(models.Manager):
     def get_best_members_by_answers(self, limit=10):
@@ -103,6 +105,21 @@ class Question(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     objects = QuestionManager()
+
+    search_vector = SearchVectorField(null=True, blank=True)    # полнотекстовsq поиск
+
+    class Meta:
+        indexes = [
+            GinIndex(fields=['search_vector']),
+            models.Index(fields=['title']),
+            models.Index(fields=['text']),
+        ]
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        Question.objects.filter(pk=self.pk).update(
+            search_vector=SearchVector('title', 'text')
+        )
 
     def __str__(self):
         return self.title
