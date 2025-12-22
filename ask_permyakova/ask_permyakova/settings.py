@@ -146,6 +146,18 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CENTRIFUGO_DOMAIN = '127.0.0.1:9000'
+centrifugo_host = os.environ.get('CENTRIFUGO_HOST', '127.0.0.1') 
+centrifugo_port = os.environ.get('CENTRIFUGO_PORT', '9000') 
+CENTRIFUGO_DOMAIN = f'{centrifugo_host}:{centrifugo_port}'
 CENTRIFUGO_SECRET_KEY = "my_secret"
 CENTRIFUGO_API_KEY = "my_api_key"
+print(f"CENTRIFUGO_DOMAIN: {CENTRIFUGO_DOMAIN}")
+
+redis_username = os.environ.get('REDIS_USER', 'kredis') 
+redis_password = os.environ.get('REDIS_PASSWORD', '1111') 
+redis_host = os.environ.get('REDIS_HOST', 'localhost') 
+redis_port = os.environ.get('REDIS_PORT', '6379') 
+redis_url = f"redis://{redis_username}:{redis_password}@{redis_host}:{redis_port}/0"
+CELERY_BROKER_URL = redis_url
+CELERY_RESULT_BACKEND = redis_url
+print(f"CELERY_BROKER_URL: {CELERY_BROKER_URL}")

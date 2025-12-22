@@ -16,6 +16,7 @@ import os
 from ask_permyakova.settings import STATIC_URL, CENTRIFUGO_SECRET_KEY, CENTRIFUGO_DOMAIN, CENTRIFUGO_API_KEY
 from app.models import Question, Tag, Profile, Answer, LikeQuestion, LikeAnswer
 from app.forms import LoginForm, RegisterForm, ProfileEditForm, QuestionForm, AnswerForm
+from ask_permyakova.celery import app
 from cent import Client, PublishRequest
 import time
 import jwt
@@ -109,6 +110,25 @@ def tag(request, tag_id):
        'cur_tag' : cur_tag,
     })
 
+def add_user_vote_for_answers(answers, profile):
+    if profile:
+        user_vote_subquery = LikeAnswer.objects.filter(
+            user=profile,
+            answer=OuterRef('pk')
+        ).values('value')[:1]
+        
+        answers = answers.annotate(
+            user_vote=Coalesce(
+                Subquery(user_vote_subquery),
+                Value(0)
+            )
+        )
+    else:
+        answers = answers.annotate(
+            user_vote=Value(0, output_field=IntegerField())
+        )
+    return answers
+
 def get_centrifugo_token(user):
     now = int(time.time())
     payload = {
@@ -118,6 +138,7 @@ def get_centrifugo_token(user):
     }
     return jwt.encode(payload, CENTRIFUGO_SECRET_KEY, algorithm="HS256")
 
+@app.task(ignore_result=True)
 def push_to_centrifugo(channel, payload):
     api_url = f"http://{CENTRIFUGO_DOMAIN}/api"
     api_key = CENTRIFUGO_API_KEY
@@ -134,6 +155,7 @@ def question(request, question_id):
     cur_question = get_object_or_404(Question, id=question_id)
     cur_question.user_vote = cur_question.is_liked(profile)
     answers = Answer.objects.get_for_question(question_id)
+    answers = add_user_vote_for_answers(answers=answers, profile=profile)
     
     if request.method == 'POST':
         form = AnswerForm(cur_question, profile, request.POST) 
@@ -141,7 +163,7 @@ def question(request, question_id):
             form.add_error(None, 'You are not authorized.')
         elif form.is_valid():
             answer = form.save()
-            push_to_centrifugo(channel_name, {"answer_id": answer.id})
+            push_to_centrifugo.delay(channel_name, {"answer_id": answer.id})
             return HttpResponseRedirect(
                 reverse('question', kwargs={'question_id': cur_question.id})+ f'#answer-{answer.id}'
             )
@@ -168,6 +190,7 @@ def get_one_answer_html(request, answer_id):
     try:
         profile = get_self_profile(request)
         answer = Answer.objects.get(id=answer_id)
+        answer.user_vote = answer.is_liked(profile)
         html = render_to_string('layout/one_answer.html', {'answer': answer, 'profile': profile})
         return JsonResponse({'html': html})
     except Answer.DoesNotExist:

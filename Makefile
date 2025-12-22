@@ -79,6 +79,22 @@ superuser:
 	DJANGO_SUPERUSER_PASSWORD=admin \
 	python $(MANGE_PY) createsuperuser --noinput
 
+.PHONY: celery_up
+celery_up:
+	docker compose -f $(DC) up --build askpermyakova_celery -d
+
+.PHONY: celery_down
+celery_down:
+	docker compose -f $(DC) down -v askpermyakova_celery 
+
+.PHONY: redis_up
+redis_up:
+	docker compose -f $(DC) up --build askpermyakova_redis -d
+
+.PHONY: redis_down
+redis_down:
+	docker compose -f $(DC) down -v askpermyakova_redis 
+
 .PHONY: gunicorn_run
 gunicorn_run:
 	docker compose -v -f $(DC) up --build gunicorn

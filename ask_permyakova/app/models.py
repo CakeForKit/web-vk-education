@@ -124,6 +124,14 @@ class Answer(models.Model):
             total=models.Sum('value')
         )['total'] or 0
     
+    def is_liked(self, profile: Profile):
+        """ like (1), dislike (-1), none (0) """
+        try:
+            like = self.likes.get(user=profile)
+            return like.value
+        except LikeAnswer.DoesNotExist:
+            return 0
+
     def as_dict(self):
         return {
             "id": self.id,
