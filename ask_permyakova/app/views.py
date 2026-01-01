@@ -9,12 +9,52 @@ from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth.decorators import login_required
 from django.db.models import OuterRef, Subquery, Value,  IntegerField
 from django.db.models.functions import Coalesce
+from django.template.loader import render_to_string
+from django.core.cache import caches
+from django.contrib.postgres.search import SearchQuery, SearchRank
 import json
 import os
 
-from ask_permyakova.settings import STATIC_URL
+from ask_permyakova.settings import STATIC_URL, \
+    CENTRIFUGO_SECRET_KEY, LOCAL_CENTRIFUGO_DOMAIN, CENTRIFUGO_DOMAIN, CENTRIFUGO_API_KEY, \
+        REDIS_KEY_POPULAR_TAGS, REDIS_TIMEOUT_POPULAR_TAGS, \
+        REDIS_KEY_BEST_MEMBERS, REDIS_TIMEOUT_BEST_MEMBERS
 from app.models import Question, Tag, Profile, Answer, LikeQuestion, LikeAnswer
 from app.forms import LoginForm, RegisterForm, ProfileEditForm, QuestionForm, AnswerForm
+from ask_permyakova.celery import app
+from cent import Client, PublishRequest
+import time
+import jwt
+
+
+@require_GET
+def search_question(request):
+    query = request.GET.get('q', '').strip()
+    if len(query) < 2:  
+        return JsonResponse({'results': []})
+    
+    print("Search: ", query)
+    
+    search_query = SearchQuery(query)
+    results = Question.objects.annotate(
+        rank=SearchRank('search_vector', search_query)
+    ).filter(
+        search_vector=search_query
+    ).order_by('-rank')[:10]  
+
+    print("Results: ", results)
+    
+    suggestions = [
+        {
+            'id': q.id,
+            'title': q.title,
+            'text': q.text[:150] + '...' if len(q.text) > 150 else q.text,
+            'url': reverse('question', args=[q.id]),
+        }
+        for q in results
+    ]
+    
+    return JsonResponse({'results': suggestions})
 
 def get_self_profile(request):
     if request.user.is_authenticated:
@@ -64,6 +104,42 @@ def add_user_vote_for_questions(questions, profile):
         )
     return questions
 
+@app.task(ignore_result=True)
+def update_cache_popular_tags():
+    client = caches['default']
+    popular_tags = Tag.objects.get_popular_tags()
+    json_str = json.dumps([x.to_dict() for x in popular_tags])
+    print(f"Get popular tags from DATEBASE")
+    client.set(REDIS_KEY_POPULAR_TAGS, json_str, timeout=REDIS_TIMEOUT_POPULAR_TAGS)
+    return popular_tags
+
+def get_popular_tags():
+    client = caches['default']
+    json_popular_tags = client.get(REDIS_KEY_POPULAR_TAGS)
+    if json_popular_tags is None:
+        return update_cache_popular_tags()
+    popular_tags = [Tag.from_dict(x) for x in json.loads(json_popular_tags)]
+    print("Get cached popular_tags!")
+    return popular_tags
+
+@app.task(ignore_result=True)
+def update_cache_best_members_by_answers():
+    client = caches['default']
+    best_members = Profile.objects.get_best_members_by_answers()
+    json_str = json.dumps([x.to_dict() for x in best_members])
+    print(f"Get best members from DATEBASE")
+    client.set(REDIS_KEY_BEST_MEMBERS, json_str, timeout=REDIS_TIMEOUT_BEST_MEMBERS)
+    return best_members
+
+def get_best_members_by_answers():
+    client = caches['default']
+    json_best_members = client.get(REDIS_KEY_BEST_MEMBERS)
+    if json_best_members is None:
+        return update_cache_best_members_by_answers()
+    best_members = [Profile.from_dict(x) for x in json.loads(json_best_members)]
+    print("Get cached best_members!")
+    return best_members
+
 def index(request):
     profile = get_self_profile(request)
     questions = Question.objects.get_new()
@@ -72,8 +148,8 @@ def index(request):
     return render(request, "index.html", context={
        'questions' : page.object_list,
        'page_obj' : page,
-       'popular_tags' : Tag.objects.get_popular_tags(),
-       'best_members' : Profile.objects.get_best_members_by_answers(),
+       'popular_tags' : get_popular_tags(),
+       'best_members' : get_best_members_by_answers(),
        'profile' : profile,
     })
 
@@ -85,8 +161,8 @@ def hot(request):
     return render(request, "hot.html", context={
        'questions' : page.object_list,
        'page_obj' : page,
-       'popular_tags' : Tag.objects.get_popular_tags(),
-       'best_members' : Profile.objects.get_best_members_by_answers(),
+       'popular_tags' : get_popular_tags(),
+       'best_members' : get_best_members_by_answers(),
        'profile' : profile,
     })
 
@@ -99,17 +175,61 @@ def tag(request, tag_id):
     return render(request, "tag.html", context={
        'questions' : page.object_list,
        'page_obj' : page,
-       'popular_tags' : Tag.objects.get_popular_tags(),
-       'best_members' : Profile.objects.get_best_members_by_answers(),
+       'popular_tags' : get_popular_tags(),
+       'best_members' : get_best_members_by_answers(),
        'profile' : profile,
        'cur_tag' : cur_tag,
     })
 
+def add_user_vote_for_answers(answers, profile):
+    if profile:
+        user_vote_subquery = LikeAnswer.objects.filter(
+            user=profile,
+            answer=OuterRef('pk')
+        ).values('value')[:1]
+        
+        answers = answers.annotate(
+            user_vote=Coalesce(
+                Subquery(user_vote_subquery),
+                Value(0)
+            )
+        )
+    else:
+        answers = answers.annotate(
+            user_vote=Value(0, output_field=IntegerField())
+        )
+    return answers
+
+def get_centrifugo_token(profile):
+    now = int(time.time())
+    payload = {
+        'sub': str(profile.user.id) if profile and profile.user.id else 'anonymous',
+        'exp': now + 3600 * 8, # seconds
+        'iat': now,  # issued at - время выдачи
+    }
+    token = jwt.encode(payload, CENTRIFUGO_SECRET_KEY, algorithm="HS256")
+    print(f"token: {token}")
+    return token
+
+@app.task(ignore_result=True)
+def push_to_centrifugo(channel, payload):
+    api_url = f"http://{CENTRIFUGO_DOMAIN}/api"
+    api_key = CENTRIFUGO_API_KEY
+
+    print(f"PUSH_TO_CENTRIFUGO: {api_url}\n\n")
+    client = Client(api_url, api_key)
+    request = PublishRequest(channel=channel, data=payload)
+    result = client.publish(request)
+    print(result)
+    return result
+
 def question(request, question_id):
+    channel_name = f"question_{question_id}"
     profile = get_self_profile(request)
     cur_question = get_object_or_404(Question, id=question_id)
     cur_question.user_vote = cur_question.is_liked(profile)
     answers = Answer.objects.get_for_question(question_id)
+    answers = add_user_vote_for_answers(answers=answers, profile=profile)
     
     if request.method == 'POST':
         form = AnswerForm(cur_question, profile, request.POST) 
@@ -117,6 +237,7 @@ def question(request, question_id):
             form.add_error(None, 'You are not authorized.')
         elif form.is_valid():
             answer = form.save()
+            push_to_centrifugo.delay(channel_name, {"answer_id": answer.id})
             return HttpResponseRedirect(
                 reverse('question', kwargs={'question_id': cur_question.id})+ f'#answer-{answer.id}'
             )
@@ -124,14 +245,30 @@ def question(request, question_id):
             form.add_error(None, 'Invalid input data.')
     else:
         form = AnswerForm(cur_question, profile)
+        
     return render(request, "question.html", context={
         'form': form,
         'question' : cur_question,
         'answers' : answers,
-        'popular_tags' : Tag.objects.get_popular_tags(),
-        'best_members' : Profile.objects.get_best_members_by_answers(),
+        'popular_tags' : get_popular_tags(),
+        'best_members' : get_best_members_by_answers(),
         'profile' : profile,
+        'centrifugo': {
+            'channel_name': channel_name,
+            'domain': LOCAL_CENTRIFUGO_DOMAIN,
+            'token': get_centrifugo_token(profile)
+        }
     })
+
+def get_one_answer_html(request, answer_id):
+    try:
+        profile = get_self_profile(request)
+        answer = Answer.objects.get(id=answer_id)
+        answer.user_vote = answer.is_liked(profile)
+        html = render_to_string('layout/one_answer.html', {'answer': answer, 'profile': profile})
+        return JsonResponse({'html': html})
+    except Answer.DoesNotExist:
+        return JsonResponse({'error': 'Answer not found'}, status=404)
 
 @login_required(login_url=reverse_lazy('login'))
 def ask(request):
@@ -149,8 +286,8 @@ def ask(request):
         form = QuestionForm(profile)
     return render(request, 'ask.html', context={
         'form': form,
-        'popular_tags' : Tag.objects.get_popular_tags(),
-        'best_members' : Profile.objects.get_best_members_by_answers(),
+        'popular_tags' : get_popular_tags(),
+        'best_members' : get_best_members_by_answers(),
         'profile' : profile,
     })
 

@@ -145,3 +145,36 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+centrifugo_host = os.environ.get('CENTRIFUGO_HOST', '127.0.0.1') 
+centrifugo_port = os.environ.get('CENTRIFUGO_PORT', '9000') 
+LOCAL_CENTRIFUGO_DOMAIN = '127.0.0.1:9000'
+CENTRIFUGO_DOMAIN = f'{centrifugo_host}:{centrifugo_port}'
+CENTRIFUGO_SECRET_KEY = "my_secret"
+CENTRIFUGO_API_KEY = "my_api_key"
+print(f"CENTRIFUGO_DOMAIN: {CENTRIFUGO_DOMAIN}")
+
+redis_username = os.environ.get('REDIS_USER', 'kredis') 
+redis_password = os.environ.get('REDIS_PASSWORD', '1111') 
+redis_host = os.environ.get('REDIS_HOST', 'localhost') 
+redis_port = os.environ.get('REDIS_PORT', '6379') 
+redis_url = f"redis://{redis_username}:{redis_password}@{redis_host}:{redis_port}/0"
+CELERY_BROKER_URL = redis_url
+CELERY_RESULT_BACKEND = redis_url
+print(f"CELERY_BROKER_URL: {CELERY_BROKER_URL}")
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": redis_url,
+    }
+}
+
+# Cache configs
+REDIS_KEY_POPULAR_TAGS = 'popular_tags'
+REDIS_AUTO_UPDATE_POPULAR_TAGS = 15
+REDIS_TIMEOUT_POPULAR_TAGS = 30
+
+REDIS_KEY_BEST_MEMBERS = 'best_members_by_answers'
+REDIS_AUTO_UPDATE_BEST_MEMBERS = 15
+REDIS_TIMEOUT_BEST_MEMBERS = 30

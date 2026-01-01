@@ -12,11 +12,34 @@ services:
       POSTGRES_DB: ask_permyakova_db     
       POSTGRES_USER: uuser            
       POSTGRES_PASSWORD: ppassword
+      REDIS_HOST: askpermyakova_redis
+      REDIS_PORT: 6379
+      REDIS_USER: kredis
+      REDIS_PASSWORD: 1111
+      CENTRIFUGO_HOST: askpermyakova_centrifugo
+      CENTRIFUGO_PORT: 8000
     depends_on:
       askpermyakova_postgres:
         condition: service_healthy  
     networks:
       - postgres-askpermyakova-net
+      - nginx-askpermyakova-net
+      - celery-askpermyakova-net
+
+  askpermyakova_centrifugo:
+    container_name: askpermyakova_centrifugo
+    image: centrifugo/centrifugo:v6
+    volumes:
+      - ./centrifugo:/centrifugo
+    command: centrifugo -c config.json
+    ports:
+      - 9000:8000
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+    networks:
+      - celery-askpermyakova-net
       - nginx-askpermyakova-net
 
   askpermyakova_nginx:
@@ -63,6 +86,43 @@ services:
     networks:
       - postgres-askpermyakova-net
 
+  askpermyakova_celery:
+    container_name: askpermyakova_celery
+    build:
+      context: .
+      dockerfile: ./celery/Dockerfile
+    environment:
+      POSTGRES_HOST: askpermyakova_postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ask_permyakova_db     
+      POSTGRES_USER: uuser            
+      POSTGRES_PASSWORD: ppassword
+      REDIS_HOST: askpermyakova_redis
+      REDIS_PORT: 6379
+      REDIS_USER: kredis
+      REDIS_PASSWORD: 1111
+      CENTRIFUGO_HOST: askpermyakova_centrifugo
+      CENTRIFUGO_PORT: 8000
+    networks:
+      - celery-askpermyakova-net
+      - postgres-askpermyakova-net
+
+  askpermyakova_redis:
+    container_name: askpermyakova_redis
+    hostname: askpermyakova_redis
+    build:
+      context: ./redis
+      dockerfile: ./Dockerfile
+    ports:
+      - "6379:6379"
+    environment:
+      REDIS_HOST: askpermyakova_redis
+      REDIS_PORT: 6379
+      REDIS_USER: kredis
+      REDIS_PASSWORD: 1111
+      REDIS_USER_PASSWORD: 1111
+    networks:
+      - celery-askpermyakova-net
 
   gunicorn:
     container_name: gunicorn
@@ -73,7 +133,7 @@ services:
     ports:
       - "8081:8081"
     networks:
-      - nginx-askpermyakova-net
+      - celery-askpermyakova-net
 
 volumes:
   pg-askpermyakova-vol:
@@ -87,3 +147,7 @@ networks:
   nginx-askpermyakova-net:
     driver: bridge
     name: nginx-askpermyakova-net
+  
+  celery-askpermyakova-net:
+    driver: bridge
+    name: celery-askpermyakova-net

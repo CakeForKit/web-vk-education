@@ -1,15 +1,26 @@
 DC := ./docker-compose.yml
 MANGE_PY := ./ask_permyakova/manage.py
 
+.PHONY: all
+all: db_start redis_up app_run celery_up centrifugo_up nginx_run
+
 .PHONY: app_run 
 app_run:
 	docker compose -f $(DC) build askpermyakova_app
-	docker compose -f $(DC) up askpermyakova_app
+	docker compose -f $(DC) up askpermyakova_app -d
 # 	./run.sh
 
 .PHONY: app_down
 app_down:
 	docker compose -f $(DC) down -v askpermyakova_app 
+
+.PHONY: centrifugo_up
+centrifugo_up:
+	docker compose -f $(DC) up --build askpermyakova_centrifugo -d
+
+.PHONY: centrifugo_down
+centrifugo_down:
+	docker compose -f $(DC) down -v askpermyakova_centrifugo 
 
 .PHONY: restart_nginx
 restart_nginx:
@@ -67,6 +78,22 @@ superuser:
 	DJANGO_SUPERUSER_EMAIL=admin@example.com \
 	DJANGO_SUPERUSER_PASSWORD=admin \
 	python $(MANGE_PY) createsuperuser --noinput
+
+.PHONY: celery_up
+celery_up:
+	docker compose -f $(DC) up --build askpermyakova_celery -d
+
+.PHONY: celery_down
+celery_down:
+	docker compose -f $(DC) down -v askpermyakova_celery 
+
+.PHONY: redis_up
+redis_up:
+	docker compose -f $(DC) up --build askpermyakova_redis -d
+
+.PHONY: redis_down
+redis_down:
+	docker compose -f $(DC) down -v askpermyakova_redis 
 
 .PHONY: gunicorn_run
 gunicorn_run:
