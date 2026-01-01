@@ -75,6 +75,14 @@ class Question(models.Model):
     def cnt_answers(self):
         return self.answer_set.count()
 
+    def is_liked(self, profile: Profile):
+        """ like (1), dislike (-1), none (0) """
+        try:
+            like = self.likes.get(user=profile)
+            return like.value
+        except LikeQuestion.DoesNotExist:
+            return 0
+
 class LikeQuestion(models.Model):
     user = models.ForeignKey(Profile, on_delete=models.CASCADE)
     value = models.SmallIntegerField(choices=[(1, 'Like'), (-1, 'Dislike')])
